@@ -2,8 +2,8 @@
 import * as React from "react"
 import { Heart, Globe, GraduationCap, Users, HandHeart, Menu, X } from "lucide-react"
 import Vector from "../imports/Vector"
-import missionPhoto from 'figma:asset/a1aae565ef0eb6aa9c217f36688f4ea12a770a91.png'
-import founderPhoto from 'figma:asset/8ff1d78a4303655cb096c3579909d018422a45fb.png'
+const missionPhoto = '/images/a1aae565ef0eb6aa9c217f36688f4ea12a770a91.png'
+const founderPhoto = '/images/8ff1d78a4303655cb096c3579909d018422a45fb.png'
 import {
   NavigationMenu,
   NavigationMenuContent,

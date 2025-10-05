@@ -1,5 +1,5 @@
 import { Heart, Award, Users, Target } from 'lucide-react';
-import founderImage from 'figma:asset/3e3a966c350e095250db86cfa1515ed4be404ac4.png';
+const founderImage = '/images/3e3a966c350e095250db86cfa1515ed4be404ac4.png';
 
 export function FounderSection() {
   return (

@@ -3,11 +3,11 @@ import { Mail, ArrowRight } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import eventPhoto1 from 'figma:asset/956f87702614bfa8929fe383df0acdaba280a29f.png';
-import eventPhoto2 from 'figma:asset/f0759e7004b9acf4f6673b28305d9f8a73239d35.png';
-import summitPhoto from 'figma:asset/de97be0f9138ca6430cd335660757972f5519922.png';
-import missionPhoto from 'figma:asset/a1aae565ef0eb6aa9c217f36688f4ea12a770a91.png';
-import founderPhoto from 'figma:asset/8ff1d78a4303655cb096c3579909d018422a45fb.png';
+const eventPhoto1 = '/images/956f87702614bfa8929fe383df0acdaba280a29f.png';
+const eventPhoto2 = '/images/f0759e7004b9acf4f6673b28305d9f8a73239d35.png';
+const summitPhoto = '/images/de97be0f9138ca6430cd335660757972f5519922.png';
+const missionPhoto = '/images/a1aae565ef0eb6aa9c217f36688f4ea12a770a91.png';
+const founderPhoto = '/images/8ff1d78a4303655cb096c3579909d018422a45fb.png';
 
 // Photos for the marquee showcasing Everybody's Cool community impact
 const marqueePhotos = [

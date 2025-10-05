@@ -1,7 +1,7 @@
 import { BookOpen, Users, Brain, GraduationCap, Target, Clock, Rocket } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import missionPhoto from 'figma:asset/a1e8c518674ff70fe2a6bd01e9bff360c1ad6205.png';
+const missionPhoto = '/images/a1e8c518674ff70fe2a6bd01e9bff360c1ad6205.png';
 
 const services = [
   {
@@ -185,27 +185,24 @@ export function ServicesSection() {
           </div>
 
           {/* OUSD Trust Badge */}
-          <div className="inline-flex items-center gap-6 bg-white/95 backdrop-blur-sm px-8 py-5 rounded-2xl border border-gray-200/60 shadow-xl relative z-10 max-w-md">
-            {/* Enhanced Logo Display */}
+          <div className="inline-flex flex-col items-center gap-3 bg-white/95 backdrop-blur-sm px-8 py-5 rounded-2xl border border-gray-200/60 shadow-xl relative z-10 max-w-md">
+            {/* Enhanced Logo Display - Now contains the text inside */}
             <div className="flex-shrink-0">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md border border-gray-100">
-                <ImageWithFallback 
-                  src="figma:asset/06a7772ca04ff898c7513bc6b3e748b830d56e9f.png"
-                  alt="Student Harvest - Every Student Logo"
-                  className="w-14 h-14 object-contain"
+              <div className="w-20 h-20 flex items-center justify-center">
+                <img 
+                  src="/images/ousd-logo.png"
+                  alt="Oakland Unified School District - Student Thrives Logo"
+                  className="w-20 h-20 object-contain"
                 />
               </div>
             </div>
             
-            {/* Institutional Text */}
-            <div className="flex flex-col gap-1">
+            {/* Institutional Text - Simplified since logo contains text */}
+            <div className="flex flex-col items-center gap-1">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                 <span className="text-xs font-medium text-emerald-700 uppercase tracking-wide">Official Partner</span>
               </div>
-              <h3 className="font-semibold text-gray-900 leading-tight">
-                Oakland Unified School District
-              </h3>
             </div>
           </div>
         </div>
