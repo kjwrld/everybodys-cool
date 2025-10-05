@@ -1,5 +1,5 @@
 import { Heart, Award, Users, Target } from 'lucide-react';
-const founderImage = '/images/3e3a966c350e095250db86cfa1515ed4be404ac4.png';
+const founderImage = '/images/3e3a966c350e095250db86cfa1515ed4be404ac4.webp';
 
 export function FounderSection() {
   return (
