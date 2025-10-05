@@ -1,32 +1,35 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 interface PlanetShaderProps {
-  className?: string;
+    className?: string;
+    style?: React.CSSProperties;
 }
 
-export function PlanetShader({ className = '' }: PlanetShaderProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
-  const startTimeRef = useRef<number>(Date.now());
+export function PlanetShader({ className = "", style }: PlanetShaderProps) {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const animationRef = useRef<number>();
+    const startTimeRef = useRef<number>(Date.now());
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
 
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-    if (!gl) {
-      console.warn('WebGL not supported');
-      return;
-    }
+        const gl =
+            canvas.getContext("webgl") ||
+            canvas.getContext("experimental-webgl");
+        if (!gl) {
+            console.warn("WebGL not supported");
+            return;
+        }
 
-    // Enable derivatives extension if available
-    const ext = gl.getExtension('OES_standard_derivatives');
-    if (ext) {
-      console.log('WebGL derivatives extension enabled');
-    }
+        // Enable derivatives extension if available
+        const ext = gl.getExtension("OES_standard_derivatives");
+        if (ext) {
+            console.log("WebGL derivatives extension enabled");
+        }
 
-    // Vertex shader - simple full-screen quad
-    const vertexShaderSource = `
+        // Vertex shader - simple full-screen quad
+        const vertexShaderSource = `
       attribute vec2 a_position;
       varying vec2 v_uv;
       
@@ -36,8 +39,8 @@ export function PlanetShader({ className = '' }: PlanetShaderProps) {
       }
     `;
 
-    // Fragment shader - your planet shader code
-    const fragmentShaderSource = `
+        // Fragment shader - your planet shader code
+        const fragmentShaderSource = `
       #ifdef GL_OES_standard_derivatives
       #extension GL_OES_standard_derivatives : enable
       #endif
@@ -61,7 +64,7 @@ export function PlanetShader({ className = '' }: PlanetShaderProps) {
 
       const float SEED = 0.0;
       vec3 CAMERA = vec3(0, 0, -1);
-      const float PLANET_RADIUS = 0.75;
+      const float PLANET_RADIUS = 0.7;
       const vec3 ROTATION_AXIS = vec3(0.3, 1, 0);
       const float ROTATION_SPEED = 0.2;
       const float MOON1_RADIUS = 0.2;
@@ -73,18 +76,18 @@ export function PlanetShader({ className = '' }: PlanetShaderProps) {
       const vec3 LAND_COLOR = vec3(0.2, 0.4, 0.0);
       const vec3 JUNGLE_COLOR = vec3(0.0, 0.2, 0.0);
       const vec3 DESERT_COLOR = vec3(1, 0.8, 0.6);
-      const vec3 SNOW_COLOR = vec3(0.85, 0.85, 0.9);
+      const vec3 SNOW_COLOR = vec3(0.85, 0.85, 0.5);
       const float OCEAN_SIZE = 0.57;
       const vec3 OCEAN_COLOR = vec3(0.1, 0.15, 0.35);
       const vec3 ATMOSPHERE_COLOR = vec3(0.4, 0.6, 1);
-      const float ATMOSPHERE_DENSITY = 1.8;
+      const float ATMOSPHERE_DENSITY = 0.7;
       const vec3 DAWN_COLOR = vec3(1, 0.7, 0.0);
       const vec3 SUNSET_COLOR = vec3(1, 0.1, 0.0);
-      const vec3 CLOUD_COLOR = vec3(1);
-      const float AMBIENT_LIGHT = 0.0;
-      const float SHADOW_STRENGTH = 0.5;
-      const vec3 LIGHT1_POS = vec3(8, 8, -8);
-      const vec4 LIGHT1_COLOR = vec4(1, 1, 1, 1);
+      const vec3 CLOUD_COLOR = vec3(0.8);
+      const float AMBIENT_LIGHT = 0.2;
+      const float SHADOW_STRENGTH = 0.0;
+      const vec3 LIGHT1_POS = vec3(0, 0, -50);
+      const vec4 LIGHT1_COLOR = vec4(1, 1, 1, 0.9);
       const vec3 LIGHT2_POS = vec3(8, 12, 4);
       const vec4 LIGHT2_COLOR = vec4(1, 1, 1, 1);
       const int TYPE = 0;
@@ -354,132 +357,162 @@ export function PlanetShader({ className = '' }: PlanetShaderProps) {
       }
     `;
 
-    // Create shader function
-    function createShader(gl: WebGLRenderingContext, type: number, source: string): WebGLShader | null {
-      const shader = gl.createShader(type);
-      if (!shader) return null;
-      
-      gl.shaderSource(shader, source);
-      gl.compileShader(shader);
-      
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.error('Shader compile error:', gl.getShaderInfoLog(shader));
-        gl.deleteShader(shader);
-        return null;
-      }
-      
-      return shader;
-    }
+        // Create shader function
+        function createShader(
+            gl: WebGLRenderingContext,
+            type: number,
+            source: string
+        ): WebGLShader | null {
+            const shader = gl.createShader(type);
+            if (!shader) return null;
 
-    // Create program
-    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-    
-    if (!vertexShader || !fragmentShader) return;
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
 
-    const program = gl.createProgram();
-    if (!program) return;
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error(
+                    "Shader compile error:",
+                    gl.getShaderInfoLog(shader)
+                );
+                gl.deleteShader(shader);
+                return null;
+            }
 
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
+            return shader;
+        }
 
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      console.error('Program link error:', gl.getProgramInfoLog(program));
-      return;
-    }
+        // Create program
+        const vertexShader = createShader(
+            gl,
+            gl.VERTEX_SHADER,
+            vertexShaderSource
+        );
+        const fragmentShader = createShader(
+            gl,
+            gl.FRAGMENT_SHADER,
+            fragmentShaderSource
+        );
 
-    // Get attribute and uniform locations
-    const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
-    const resolutionUniformLocation = gl.getUniformLocation(program, 'iResolution');
-    const timeUniformLocation = gl.getUniformLocation(program, 'iTime');
-    const mouseUniformLocation = gl.getUniformLocation(program, 'iMouse');
+        if (!vertexShader || !fragmentShader) return;
 
-    // Create a buffer for the quad
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-      -1, -1,
-       1, -1,
-      -1,  1,
-      -1,  1,
-       1, -1,
-       1,  1,
-    ]), gl.STATIC_DRAW);
+        const program = gl.createProgram();
+        if (!program) return;
 
-    // Resize canvas to match display size
-    function resizeCanvas() {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      
-      const rect = canvas.getBoundingClientRect();
-      const displayWidth = rect.width;
-      const displayHeight = rect.height;
-      
-      // Set actual canvas size in memory (scaled by device pixel ratio for sharpness)
-      const devicePixelRatio = window.devicePixelRatio || 1;
-      canvas.width = displayWidth * devicePixelRatio;
-      canvas.height = displayHeight * devicePixelRatio;
-      
-      gl.viewport(0, 0, canvas.width, canvas.height);
-    }
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
 
-    // Animation loop
-    function animate() {
-      if (!canvasRef.current) return;
-      
-      resizeCanvas();
-      
-      const currentTime = (Date.now() - startTimeRef.current) / 1000;
-      
-      gl.useProgram(program);
-      
-      // Set uniforms
-      gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height);
-      gl.uniform1f(timeUniformLocation, currentTime);
-      gl.uniform2f(mouseUniformLocation, 0, 0); // You can add mouse interaction later
-      
-      // Bind position attribute
-      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-      gl.enableVertexAttribArray(positionAttributeLocation);
-      gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
-      
-      // Draw
-      gl.clearColor(0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
-      
-      animationRef.current = requestAnimationFrame(animate);
-    }
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            console.error("Program link error:", gl.getProgramInfoLog(program));
+            return;
+        }
 
-    // Start animation
-    resizeCanvas();
-    animate();
+        // Get attribute and uniform locations
+        const positionAttributeLocation = gl.getAttribLocation(
+            program,
+            "a_position"
+        );
+        const resolutionUniformLocation = gl.getUniformLocation(
+            program,
+            "iResolution"
+        );
+        const timeUniformLocation = gl.getUniformLocation(program, "iTime");
+        const mouseUniformLocation = gl.getUniformLocation(program, "iMouse");
 
-    // Handle resize
-    const handleResize = () => resizeCanvas();
-    window.addEventListener('resize', handleResize);
+        // Create a buffer for the quad
+        const positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.bufferData(
+            gl.ARRAY_BUFFER,
+            new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
+            gl.STATIC_DRAW
+        );
 
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-      window.removeEventListener('resize', handleResize);
-      gl.deleteProgram(program);
-      gl.deleteShader(vertexShader);
-      gl.deleteShader(fragmentShader);
-    };
-  }, []);
+        // Resize canvas to match display size
+        function resizeCanvas() {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className={`${className}`}
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'block'
-      }}
-    />
-  );
+            const rect = canvas.getBoundingClientRect();
+            const displayWidth = rect.width;
+            const displayHeight = rect.height;
+
+            // Set actual canvas size in memory (scaled by device pixel ratio for sharpness)
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            canvas.width = displayWidth * devicePixelRatio;
+            canvas.height = displayHeight * devicePixelRatio;
+
+            gl.viewport(0, 0, canvas.width, canvas.height);
+        }
+
+        // Animation loop
+        function animate() {
+            if (!canvasRef.current) return;
+
+            resizeCanvas();
+
+            const currentTime = (Date.now() - startTimeRef.current) / 1000;
+
+            gl.useProgram(program);
+
+            // Set uniforms
+            gl.uniform2f(
+                resolutionUniformLocation,
+                canvas.width,
+                canvas.height
+            );
+            gl.uniform1f(timeUniformLocation, currentTime);
+            gl.uniform2f(mouseUniformLocation, 0, 0); // You can add mouse interaction later
+
+            // Bind position attribute
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.enableVertexAttribArray(positionAttributeLocation);
+            gl.vertexAttribPointer(
+                positionAttributeLocation,
+                2,
+                gl.FLOAT,
+                false,
+                0,
+                0
+            );
+
+            // Draw
+            gl.clearColor(0, 0, 0, 0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+            animationRef.current = requestAnimationFrame(animate);
+        }
+
+        // Start animation
+        resizeCanvas();
+        animate();
+
+        // Handle resize
+        const handleResize = () => resizeCanvas();
+        window.addEventListener("resize", handleResize);
+
+        return () => {
+            if (animationRef.current) {
+                cancelAnimationFrame(animationRef.current);
+            }
+            window.removeEventListener("resize", handleResize);
+            gl.deleteProgram(program);
+            gl.deleteShader(vertexShader);
+            gl.deleteShader(fragmentShader);
+        };
+    }, []);
+
+    return (
+        <canvas
+            ref={canvasRef}
+            className={`${className}`}
+            style={{
+                width: "100%",
+                height: "100%",
+                display: "block",
+                ...style,
+            }}
+        />
+    );
 }
