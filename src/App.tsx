@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Globe, ArrowRight } from 'lucide-react';
+import { X, ArrowRight } from 'lucide-react';
 import { AnimatedGradient } from './components/AnimatedGradient';
 import { DonationForm } from './components/DonationForm';
 import { DonationModal } from './components/DonationModal';
@@ -10,6 +10,7 @@ import { EmailSignupSection } from './components/EmailSignupSection';
 import { Footer } from './components/Footer';
 import { SchoolBookingTab } from './components/SchoolBookingTab';
 import { ConfettiCanvas } from './components/ConfettiCanvas';
+import { PlanetShader } from './components/PlanetShader';
 
 export default function App() {
   const [showTopCard, setShowTopCard] = useState(false);
@@ -135,9 +136,11 @@ export default function App() {
         <div className="h-full w-full relative">
           <AnimatedGradient />
           
-          {/* Massive Globe Icon - Front and Center */}
+          {/* Planet Shader Canvas - Front and Center */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <Globe className="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 xl:w-72 xl:h-72 text-white/90 hover:text-white transition-colors duration-500 drop-shadow-2xl" />
+            <div className="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 xl:w-72 xl:h-72 drop-shadow-2xl">
+              <PlanetShader className="w-full h-full" />
+            </div>
           </div>
           
           {/* "Humanity First" Title - Bottom Left */}

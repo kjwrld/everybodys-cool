@@ -238,32 +238,34 @@ export function EmailSignupSection() {
       </div>
 
       {/* Custom Marquee Animation Styles */}
-      <style jsx>{`
-        @keyframes marquee-scroll {
-          0% {
-            transform: translateX(0);
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @keyframes marquee-scroll {
+            0% {
+              transform: translateX(0);
+            }
+            100% {
+              transform: translateX(-1440px);
+            }
           }
-          100% {
-            transform: translateX(-1440px);
-          }
-        }
-        
-        .animate-marquee {
-          width: 2880px;
-          animation: marquee-scroll 12s linear infinite;
-        }
-        
-        /* Desktop: Slower marquee speed for better viewing */
-        @media (min-width: 768px) {
+          
           .animate-marquee {
-            animation: marquee-scroll 18s linear infinite;
+            width: 2880px;
+            animation: marquee-scroll 12s linear infinite;
           }
-        }
-        
-        .animate-marquee:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
+          
+          /* Desktop: Slower marquee speed for better viewing */
+          @media (min-width: 768px) {
+            .animate-marquee {
+              animation: marquee-scroll 18s linear infinite;
+            }
+          }
+          
+          .animate-marquee:hover {
+            animation-play-state: paused;
+          }
+        `
+      }} />
     </section>
   );
 }
