@@ -1,0 +1,6 @@
+                                 {/* Photo caption text */}
+                                 <div className="relative z-10 text-white">
+                                   <p className="text-sm text-white/90 leading-relaxed">
+                                     Our Founder, Kymm, with his two children at an Everybody's Cool pop up event (2020)
+                                   </p>
+                                 </div>
