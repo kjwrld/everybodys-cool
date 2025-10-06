@@ -26,6 +26,7 @@ export default function App() {
         useState(false);
     const [footerScrollProgress, setFooterScrollProgress] = useState(0);
     const [planetScale, setPlanetScale] = useState(0.95);
+    const [isMobile, setIsMobile] = useState(false);
     
     // Painterly controls
     const [enablePainterly, setEnablePainterly] = useState(true);
@@ -39,10 +40,13 @@ export default function App() {
         return () => clearTimeout(timer);
     }, []);
 
-    // Responsive planet scaling
+    // Responsive planet scaling and mobile detection
     useEffect(() => {
         const updateScale = () => {
             const width = window.innerWidth;
+            const isMobileDevice = width < 768;
+            setIsMobile(isMobileDevice);
+            
             if (width >= 1024) {
                 setPlanetScale(0.5); // Desktop: 50%
             } else if (width >= 768) {
@@ -181,9 +185,20 @@ export default function App() {
                 {/* Background */}
                 <AnimatedGradient />
 
-                {/* Planet Shader */}
+                {/* Planet Shader or Mobile Fallback */}
                 <div className="absolute inset-0">
-                    {enablePainterly ? (
+                    {isMobile ? (
+                        <div className="w-full h-full flex items-center justify-center">
+                            <img
+                                src="/images/planet-fallback.webp"
+                                alt="Planet"
+                                className="max-w-full max-h-full object-contain drop-shadow-2xl"
+                                style={{
+                                    transform: `scale(${planetScale})`,
+                                }}
+                            />
+                        </div>
+                    ) : enablePainterly ? (
                         <PostProcessingPlanetShader
                             className="w-full h-full drop-shadow-2xl"
                             style={{
@@ -218,9 +233,33 @@ export default function App() {
             {/* Founder Section */}
             <FounderSection />
 
-            {/* Email Signup Section with generous bottom spacing for footer reveal */}
-            <div className="pb-40 md:pb-56 lg:pb-72">
+            {/* Email Signup Section with bottom spacing for footer reveal on desktop only */}
+            <div className="pb-0 md:pb-56 lg:pb-72 relative">
                 <EmailSignupSection />
+                
+                {/* Grain texture for bottom spacing on desktop only */}
+                <div className="hidden md:block absolute bottom-0 left-0 right-0 h-56 lg:h-72 bg-gradient-to-br from-[#F9F9F9] via-white to-[#AFC6FE]/20">
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ filter: 'contrast(170%) brightness(100%)' }}>
+                        <defs>
+                            <filter id="bottomSpacingGrainFilter">
+                                <feTurbulence 
+                                    type="fractalNoise" 
+                                    baseFrequency="0.9" 
+                                    numOctaves="4" 
+                                    stitchTiles="stitch"
+                                />
+                                <feColorMatrix type="saturate" values="0"/>
+                            </filter>
+                        </defs>
+                        <rect 
+                            width="100%" 
+                            height="100%" 
+                            filter="url(#bottomSpacingGrainFilter)" 
+                            opacity="0.4"
+                            style={{ mixBlendMode: 'multiply' }}
+                        />
+                    </svg>
+                </div>
             </div>
 
             {/* Scroll-Reveal Footer */}

@@ -1,4 +1,5 @@
 import { Heart, Globe, GraduationCap, Users, Mail, Phone, MapPin, Copyright } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import Vector from "../imports/Vector";
 
 interface FooterProps {
@@ -7,6 +8,17 @@ interface FooterProps {
 
 export function Footer({ scrollProgress = 0 }: FooterProps) {
   const currentYear = new Date().getFullYear();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const missionLinks = [
     { title: "Transforming School Environments", href: "#programs" },
@@ -23,9 +35,9 @@ export function Footer({ scrollProgress = 0 }: FooterProps) {
 
   return (
     <footer 
-      className="fixed bottom-0 left-0 right-0 w-full bg-[#185CFC] backdrop-blur-xl overflow-hidden z-30 transition-transform duration-300 ease-out"
+      className={`${isMobile ? 'relative' : 'fixed bottom-0 left-0 right-0'} w-full bg-[#185CFC] backdrop-blur-xl overflow-hidden z-30 transition-transform duration-300 ease-out`}
       style={{
-        transform: `translateY(${100 - scrollProgress * 100}%)`
+        transform: isMobile ? 'translateY(0%)' : `translateY(${100 - scrollProgress * 100}%)`
       }}
     >
       {/* Grain texture overlay - same as navbar */}
