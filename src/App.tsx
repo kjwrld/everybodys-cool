@@ -11,6 +11,7 @@ import { Footer } from "./components/Footer";
 import { SchoolBookingTab } from "./components/SchoolBookingTab";
 import { ConfettiCanvas } from "./components/ConfettiCanvas";
 import { PlanetShader } from "./components/PlanetShader";
+import { PostProcessingPlanetShader } from "./components/PostProcessing";
 
 export default function App() {
     const [showTopCard, setShowTopCard] = useState(false);
@@ -25,6 +26,12 @@ export default function App() {
         useState(false);
     const [footerScrollProgress, setFooterScrollProgress] = useState(0);
     const [planetScale, setPlanetScale] = useState(0.95);
+    
+    // Painterly controls
+    const [enablePainterly, setEnablePainterly] = useState(true);
+    const [painterlyRadius, setPainterlyRadius] = useState(7);
+    const [kuwaharaAlpha, setKuwaharaAlpha] = useState(25.0);
+    const [kuwaharaSamples, setKuwaharaSamples] = useState(8);
 
     // Fade in the top card after component mounts
     useEffect(() => {
@@ -182,6 +189,22 @@ export default function App() {
                             transform: `scale(${planetScale})`,
                         }}
                     />
+                    {enablePainterly && (
+                        <PostProcessingPlanetShader
+                            className="w-full h-full"
+                            style={{
+                                transform: `scale(${planetScale})`,
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                pointerEvents: "none"
+                            }}
+                            enablePainterly={enablePainterly}
+                            painterlyRadius={painterlyRadius}
+                            kuwaharaAlpha={kuwaharaAlpha}
+                            kuwaharaSamples={kuwaharaSamples}
+                        />
+                    )}
                 </div>
 
                 {/* Content */}
@@ -359,6 +382,66 @@ export default function App() {
                 trigger={triggerConfetti}
                 buttonPosition={confettiPosition}
             />
+
+            {/* Debug Panel for Painterly Controls */}
+            <div className="fixed top-4 left-4 z-50 bg-black/80 text-white p-4 rounded-lg text-sm max-w-xs">
+                <h3 className="font-bold mb-2">🎨 Painterly Controls</h3>
+                
+                <div className="space-y-2">
+                    <label className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            checked={enablePainterly}
+                            onChange={(e) => setEnablePainterly(e.target.checked)}
+                            className="rounded"
+                        />
+                        Enable Painterly
+                    </label>
+                    
+                    {enablePainterly && (
+                        <>
+                            <div>
+                                <label className="block text-xs">Radius: {painterlyRadius}</label>
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="10"
+                                    step="1"
+                                    value={painterlyRadius}
+                                    onChange={(e) => setPainterlyRadius(Number(e.target.value))}
+                                    className="w-full"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-xs">Alpha: {kuwaharaAlpha}</label>
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="50"
+                                    step="1"
+                                    value={kuwaharaAlpha}
+                                    onChange={(e) => setKuwaharaAlpha(Number(e.target.value))}
+                                    className="w-full"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-xs">Samples: {kuwaharaSamples}</label>
+                                <input
+                                    type="range"
+                                    min="4"
+                                    max="16"
+                                    step="1"
+                                    value={kuwaharaSamples}
+                                    onChange={(e) => setKuwaharaSamples(Number(e.target.value))}
+                                    className="w-full"
+                                />
+                            </div>
+                        </>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }
