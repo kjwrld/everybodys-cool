@@ -10,14 +10,14 @@ interface PostProcessingProps {
     clearStrength?: number;
 }
 
-export function PostProcessingPlanetShader({ 
-    className = "", 
+export function PostProcessingPlanetShader({
+    className = "",
     style,
     enablePainterly = true,
     painterlyRadius = 7,
     kuwaharaAlpha = 25.0,
     kuwaharaSamples = 8,
-    clearStrength = 1.0
+    clearStrength = 1.0,
 }: PostProcessingProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const animationRef = useRef<number>();
@@ -27,8 +27,15 @@ export function PostProcessingPlanetShader({
         const canvas = canvasRef.current;
         if (!canvas) return;
 
-        const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false }) || 
-                   canvas.getContext("experimental-webgl", { alpha: true, premultipliedAlpha: false });
+        const gl =
+            canvas.getContext("webgl", {
+                alpha: true,
+                premultipliedAlpha: false,
+            }) ||
+            canvas.getContext("experimental-webgl", {
+                alpha: true,
+                premultipliedAlpha: false,
+            });
         if (!gl) {
             console.warn("WebGL not supported");
             return;
@@ -80,7 +87,7 @@ export function PostProcessingPlanetShader({
 
             const float SEED = 0.0;
             vec3 CAMERA = vec3(0, 0, -1);
-            const float PLANET_RADIUS = 0.7;
+            const float PLANET_RADIUS = 0.8;
             const vec3 ROTATION_AXIS = vec3(0.3, 1, 0);
             const float ROTATION_SPEED = 0.2;
             const float MOON1_RADIUS = 0.2;
@@ -90,20 +97,20 @@ export function PostProcessingPlanetShader({
             const float MOON3_RADIUS = 0.2;
             const vec3 MOON3_POS = vec3(12.5, 1.3, -2);
             const vec3 LAND_COLOR = vec3(0.2, 0.4, 0.0);
-            const vec3 JUNGLE_COLOR = vec3(0.0, 0.2, 0.0);
-            const vec3 DESERT_COLOR = vec3(1, 0.8, 0.6);
-            const vec3 SNOW_COLOR = vec3(0.85, 0.85, 0.5);
+            const vec3 JUNGLE_COLOR = vec3(0.2, 0.4, 0.0);
+            const vec3 DESERT_COLOR = vec3(0.2, 0.4, 0.0);
+            const vec3 SNOW_COLOR = vec3(0.2, 0.4, 0.0);
             const float OCEAN_SIZE = 0.57;
             const vec3 OCEAN_COLOR = vec3(0.1, 0.15, 0.35);
             const vec3 ATMOSPHERE_COLOR = vec3(0.4, 0.6, 1);
-            const float ATMOSPHERE_DENSITY = 0.7;
+            const float ATMOSPHERE_DENSITY = 0.4;
             const vec3 DAWN_COLOR = vec3(1, 0.7, 0.0);
             const vec3 SUNSET_COLOR = vec3(1, 0.1, 0.0);
-            const vec3 CLOUD_COLOR = vec3(0.8);
-            const float AMBIENT_LIGHT = 0.2;
+            const vec3 CLOUD_COLOR = vec3(0.25);
+            const float AMBIENT_LIGHT = 1.0;
             const float SHADOW_STRENGTH = 0.0;
             const vec3 LIGHT1_POS = vec3(0, 0, -50);
-            const vec4 LIGHT1_COLOR = vec4(1, 1, 1, 0.9);
+            const vec4 LIGHT1_COLOR = vec4(1, 1, 1, 1);
             const vec3 LIGHT2_POS = vec3(8, 12, 4);
             const vec4 LIGHT2_COLOR = vec4(1, 1, 1, 1);
             const int TYPE = 0;
@@ -588,67 +595,109 @@ export function PostProcessingPlanetShader({
         `;
 
         // Compile shader helper
-        function compileShader(type: number, source: string): WebGLShader | null {
+        function compileShader(
+            type: number,
+            source: string
+        ): WebGLShader | null {
             const shader = gl.createShader(type);
             if (!shader) return null;
-            
+
             gl.shaderSource(shader, source);
             gl.compileShader(shader);
-            
+
             if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                console.error('Shader compilation error:', gl.getShaderInfoLog(shader));
+                console.error(
+                    "Shader compilation error:",
+                    gl.getShaderInfoLog(shader)
+                );
                 gl.deleteShader(shader);
                 return null;
             }
-            
+
             return shader;
         }
 
         // Create program helper
-        function createProgram(vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram | null {
+        function createProgram(
+            vertexShader: WebGLShader,
+            fragmentShader: WebGLShader
+        ): WebGLProgram | null {
             const program = gl.createProgram();
             if (!program) return null;
-            
+
             gl.attachShader(program, vertexShader);
             gl.attachShader(program, fragmentShader);
             gl.linkProgram(program);
-            
+
             if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-                console.error('Program linking error:', gl.getProgramInfoLog(program));
+                console.error(
+                    "Program linking error:",
+                    gl.getProgramInfoLog(program)
+                );
                 gl.deleteProgram(program);
                 return null;
             }
-            
+
             return program;
         }
 
         // Create framebuffer helper
-        function createFramebuffer(width: number, height: number): {fb: WebGLFramebuffer, texture: WebGLTexture} | null {
+        function createFramebuffer(
+            width: number,
+            height: number
+        ): { fb: WebGLFramebuffer; texture: WebGLTexture } | null {
             const framebuffer = gl.createFramebuffer();
             const texture = gl.createTexture();
-            
+
             if (!framebuffer || !texture) return null;
 
             gl.bindTexture(gl.TEXTURE_2D, texture);
             // Create an empty transparent buffer first
             const emptyData = new Uint8Array(width * height * 4);
             for (let i = 0; i < emptyData.length; i += 4) {
-                emptyData[i] = 0;     // R
-                emptyData[i + 1] = 0; // G  
+                emptyData[i] = 0; // R
+                emptyData[i + 1] = 0; // G
                 emptyData[i + 2] = 0; // B
                 emptyData[i + 3] = 0; // A (transparent)
             }
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, emptyData);
+            gl.texImage2D(
+                gl.TEXTURE_2D,
+                0,
+                gl.RGBA,
+                width,
+                height,
+                0,
+                gl.RGBA,
+                gl.UNSIGNED_BYTE,
+                emptyData
+            );
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_WRAP_S,
+                gl.CLAMP_TO_EDGE
+            );
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_WRAP_T,
+                gl.CLAMP_TO_EDGE
+            );
 
             gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+            gl.framebufferTexture2D(
+                gl.FRAMEBUFFER,
+                gl.COLOR_ATTACHMENT0,
+                gl.TEXTURE_2D,
+                texture,
+                0
+            );
 
-            if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
-                console.error('Framebuffer not complete');
+            if (
+                gl.checkFramebufferStatus(gl.FRAMEBUFFER) !==
+                gl.FRAMEBUFFER_COMPLETE
+            ) {
+                console.error("Framebuffer not complete");
                 return null;
             }
 
@@ -668,7 +717,7 @@ export function PostProcessingPlanetShader({
 
             ctx.fillStyle = "#f8f8f8";
             ctx.fillRect(0, 0, 512, 512);
-            
+
             for (let i = 0; i < 1000; i++) {
                 ctx.fillStyle = `rgba(200, 200, 200, ${Math.random() * 0.3})`;
                 ctx.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
@@ -678,24 +727,60 @@ export function PostProcessingPlanetShader({
             if (!texture) return null;
 
             gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
+            gl.texImage2D(
+                gl.TEXTURE_2D,
+                0,
+                gl.RGBA,
+                gl.RGBA,
+                gl.UNSIGNED_BYTE,
+                canvas
+            );
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_WRAP_S,
+                gl.CLAMP_TO_EDGE
+            );
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_WRAP_T,
+                gl.CLAMP_TO_EDGE
+            );
             gl.bindTexture(gl.TEXTURE_2D, null);
 
             return texture;
         }
 
         // Compile all shaders
-        const vertexShader = compileShader(gl.VERTEX_SHADER, vertexShaderSource);
-        const planetFragmentShader = compileShader(gl.FRAGMENT_SHADER, planetFragmentShaderSource);
-        const tensorFragmentShader = compileShader(gl.FRAGMENT_SHADER, tensorFragmentShaderSource);
-        const kuwaharaFragmentShader = compileShader(gl.FRAGMENT_SHADER, kuwaharaFragmentShaderSource);
-        const finalFragmentShader = compileShader(gl.FRAGMENT_SHADER, finalFragmentShaderSource);
+        const vertexShader = compileShader(
+            gl.VERTEX_SHADER,
+            vertexShaderSource
+        );
+        const planetFragmentShader = compileShader(
+            gl.FRAGMENT_SHADER,
+            planetFragmentShaderSource
+        );
+        const tensorFragmentShader = compileShader(
+            gl.FRAGMENT_SHADER,
+            tensorFragmentShaderSource
+        );
+        const kuwaharaFragmentShader = compileShader(
+            gl.FRAGMENT_SHADER,
+            kuwaharaFragmentShaderSource
+        );
+        const finalFragmentShader = compileShader(
+            gl.FRAGMENT_SHADER,
+            finalFragmentShaderSource
+        );
 
-        if (!vertexShader || !planetFragmentShader || !tensorFragmentShader || !kuwaharaFragmentShader || !finalFragmentShader) {
+        if (
+            !vertexShader ||
+            !planetFragmentShader ||
+            !tensorFragmentShader ||
+            !kuwaharaFragmentShader ||
+            !finalFragmentShader
+        ) {
             console.error("Failed to compile shaders");
             return;
         }
@@ -703,55 +788,74 @@ export function PostProcessingPlanetShader({
         // Create programs
         const planetProgram = createProgram(vertexShader, planetFragmentShader);
         const tensorProgram = createProgram(vertexShader, tensorFragmentShader);
-        const kuwaharaProgram = createProgram(vertexShader, kuwaharaFragmentShader);
+        const kuwaharaProgram = createProgram(
+            vertexShader,
+            kuwaharaFragmentShader
+        );
         const finalProgram = createProgram(vertexShader, finalFragmentShader);
 
-        if (!planetProgram || !tensorProgram || !kuwaharaProgram || !finalProgram) {
+        if (
+            !planetProgram ||
+            !tensorProgram ||
+            !kuwaharaProgram ||
+            !finalProgram
+        ) {
             console.error("Failed to create programs");
             return;
         }
 
         // Get uniform locations
         const planetUniforms = {
-            resolution: gl.getUniformLocation(planetProgram, 'iResolution'),
-            time: gl.getUniformLocation(planetProgram, 'iTime'),
-            mouse: gl.getUniformLocation(planetProgram, 'iMouse'),
-            position: gl.getAttribLocation(planetProgram, 'a_position')
+            resolution: gl.getUniformLocation(planetProgram, "iResolution"),
+            time: gl.getUniformLocation(planetProgram, "iTime"),
+            mouse: gl.getUniformLocation(planetProgram, "iMouse"),
+            position: gl.getAttribLocation(planetProgram, "a_position"),
         };
 
         const tensorUniforms = {
-            inputBuffer: gl.getUniformLocation(tensorProgram, 'inputBuffer'),
-            resolution: gl.getUniformLocation(tensorProgram, 'resolution'),
-            position: gl.getAttribLocation(tensorProgram, 'a_position')
+            inputBuffer: gl.getUniformLocation(tensorProgram, "inputBuffer"),
+            resolution: gl.getUniformLocation(tensorProgram, "resolution"),
+            position: gl.getAttribLocation(tensorProgram, "a_position"),
         };
 
         const kuwaharaUniforms = {
-            inputBuffer: gl.getUniformLocation(kuwaharaProgram, 'inputBuffer'),
-            originalTexture: gl.getUniformLocation(kuwaharaProgram, 'originalTexture'),
-            resolution: gl.getUniformLocation(kuwaharaProgram, 'resolution'),
-            radius: gl.getUniformLocation(kuwaharaProgram, 'radius'),
-            alpha: gl.getUniformLocation(kuwaharaProgram, 'alpha'),
-            position: gl.getAttribLocation(kuwaharaProgram, 'a_position')
+            inputBuffer: gl.getUniformLocation(kuwaharaProgram, "inputBuffer"),
+            originalTexture: gl.getUniformLocation(
+                kuwaharaProgram,
+                "originalTexture"
+            ),
+            resolution: gl.getUniformLocation(kuwaharaProgram, "resolution"),
+            radius: gl.getUniformLocation(kuwaharaProgram, "radius"),
+            alpha: gl.getUniformLocation(kuwaharaProgram, "alpha"),
+            position: gl.getAttribLocation(kuwaharaProgram, "a_position"),
         };
 
         const finalUniforms = {
-            inputBuffer: gl.getUniformLocation(finalProgram, 'inputBuffer'),
-            watercolorTexture: gl.getUniformLocation(finalProgram, 'watercolorTexture'),
-            position: gl.getAttribLocation(finalProgram, 'a_position')
+            inputBuffer: gl.getUniformLocation(finalProgram, "inputBuffer"),
+            watercolorTexture: gl.getUniformLocation(
+                finalProgram,
+                "watercolorTexture"
+            ),
+            position: gl.getAttribLocation(finalProgram, "a_position"),
         };
 
         // Create vertex buffer
         const positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-            -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1,
-        ]), gl.STATIC_DRAW);
+        gl.bufferData(
+            gl.ARRAY_BUFFER,
+            new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
+            gl.STATIC_DRAW
+        );
 
         // Create framebuffers and textures
-        let planetFB: {fb: WebGLFramebuffer, texture: WebGLTexture} | null = null;
-        let tensorFB: {fb: WebGLFramebuffer, texture: WebGLTexture} | null = null;
-        let kuwaharaFB: {fb: WebGLFramebuffer, texture: WebGLTexture} | null = null;
-        
+        let planetFB: { fb: WebGLFramebuffer; texture: WebGLTexture } | null =
+            null;
+        let tensorFB: { fb: WebGLFramebuffer; texture: WebGLTexture } | null =
+            null;
+        let kuwaharaFB: { fb: WebGLFramebuffer; texture: WebGLTexture } | null =
+            null;
+
         // Create paper texture
         const paperTexture = createPaperTexture();
 
@@ -763,7 +867,7 @@ export function PostProcessingPlanetShader({
             const displayWidth = rect.width;
             const displayHeight = rect.height;
             const devicePixelRatio = window.devicePixelRatio || 1;
-            
+
             canvas.width = displayWidth * devicePixelRatio;
             canvas.height = displayHeight * devicePixelRatio;
 
@@ -783,9 +887,15 @@ export function PostProcessingPlanetShader({
             resizeCanvas();
             const currentTime = (Date.now() - startTimeRef.current) / 1000.0;
 
-            if (enablePainterly && planetFB && tensorFB && kuwaharaFB && paperTexture) {
+            if (
+                enablePainterly &&
+                planetFB &&
+                tensorFB &&
+                kuwaharaFB &&
+                paperTexture
+            ) {
                 // Multi-pass rendering
-                
+
                 // Pass 1: Render planet to texture
                 gl.bindFramebuffer(gl.FRAMEBUFFER, planetFB.fb);
                 gl.viewport(0, 0, canvas.width, canvas.height);
@@ -793,15 +903,26 @@ export function PostProcessingPlanetShader({
                 gl.clear(gl.COLOR_BUFFER_BIT);
                 gl.enable(gl.BLEND);
                 gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-                
+
                 gl.useProgram(planetProgram);
-                gl.uniform2f(planetUniforms.resolution, canvas.width, canvas.height);
+                gl.uniform2f(
+                    planetUniforms.resolution,
+                    canvas.width,
+                    canvas.height
+                );
                 gl.uniform1f(planetUniforms.time, currentTime);
                 gl.uniform2f(planetUniforms.mouse, 0.0, 0.0);
-                
+
                 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
                 gl.enableVertexAttribArray(planetUniforms.position);
-                gl.vertexAttribPointer(planetUniforms.position, 2, gl.FLOAT, false, 0, 0);
+                gl.vertexAttribPointer(
+                    planetUniforms.position,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    0,
+                    0
+                );
                 gl.drawArrays(gl.TRIANGLES, 0, 6);
 
                 // Pass 2: Tensor field analysis
@@ -810,15 +931,28 @@ export function PostProcessingPlanetShader({
                 gl.clear(gl.COLOR_BUFFER_BIT);
                 gl.disable(gl.BLEND);
                 gl.useProgram(tensorProgram);
-                
+
                 gl.activeTexture(gl.TEXTURE0);
                 gl.bindTexture(gl.TEXTURE_2D, planetFB.texture);
                 gl.uniform1i(tensorUniforms.inputBuffer, 0);
-                gl.uniform4f(tensorUniforms.resolution, canvas.width, canvas.height, 1.0/canvas.width, 1.0/canvas.height);
-                
+                gl.uniform4f(
+                    tensorUniforms.resolution,
+                    canvas.width,
+                    canvas.height,
+                    1.0 / canvas.width,
+                    1.0 / canvas.height
+                );
+
                 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
                 gl.enableVertexAttribArray(tensorUniforms.position);
-                gl.vertexAttribPointer(tensorUniforms.position, 2, gl.FLOAT, false, 0, 0);
+                gl.vertexAttribPointer(
+                    tensorUniforms.position,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    0,
+                    0
+                );
                 gl.drawArrays(gl.TRIANGLES, 0, 6);
 
                 // Pass 3: Kuwahara filter
@@ -827,22 +961,35 @@ export function PostProcessingPlanetShader({
                 gl.clear(gl.COLOR_BUFFER_BIT);
                 gl.disable(gl.BLEND);
                 gl.useProgram(kuwaharaProgram);
-                
+
                 gl.activeTexture(gl.TEXTURE0);
                 gl.bindTexture(gl.TEXTURE_2D, tensorFB.texture);
                 gl.uniform1i(kuwaharaUniforms.inputBuffer, 0);
-                
+
                 gl.activeTexture(gl.TEXTURE1);
                 gl.bindTexture(gl.TEXTURE_2D, planetFB.texture);
                 gl.uniform1i(kuwaharaUniforms.originalTexture, 1);
-                
-                gl.uniform4f(kuwaharaUniforms.resolution, canvas.width, canvas.height, 1.0/canvas.width, 1.0/canvas.height);
+
+                gl.uniform4f(
+                    kuwaharaUniforms.resolution,
+                    canvas.width,
+                    canvas.height,
+                    1.0 / canvas.width,
+                    1.0 / canvas.height
+                );
                 gl.uniform1i(kuwaharaUniforms.radius, painterlyRadius);
                 gl.uniform1f(kuwaharaUniforms.alpha, kuwaharaAlpha);
-                
+
                 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
                 gl.enableVertexAttribArray(kuwaharaUniforms.position);
-                gl.vertexAttribPointer(kuwaharaUniforms.position, 2, gl.FLOAT, false, 0, 0);
+                gl.vertexAttribPointer(
+                    kuwaharaUniforms.position,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    0,
+                    0
+                );
                 gl.drawArrays(gl.TRIANGLES, 0, 6);
 
                 // Pass 4: Final composition to screen
@@ -852,34 +999,51 @@ export function PostProcessingPlanetShader({
                 gl.enable(gl.BLEND);
                 gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
                 gl.useProgram(finalProgram);
-                
+
                 gl.activeTexture(gl.TEXTURE0);
                 gl.bindTexture(gl.TEXTURE_2D, kuwaharaFB.texture);
                 gl.uniform1i(finalUniforms.inputBuffer, 0);
-                
+
                 gl.activeTexture(gl.TEXTURE1);
                 gl.bindTexture(gl.TEXTURE_2D, paperTexture);
                 gl.uniform1i(finalUniforms.watercolorTexture, 1);
-                
+
                 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
                 gl.enableVertexAttribArray(finalUniforms.position);
-                gl.vertexAttribPointer(finalUniforms.position, 2, gl.FLOAT, false, 0, 0);
+                gl.vertexAttribPointer(
+                    finalUniforms.position,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    0,
+                    0
+                );
                 gl.drawArrays(gl.TRIANGLES, 0, 6);
-                
             } else {
                 // Direct planet rendering
                 gl.bindFramebuffer(gl.FRAMEBUFFER, null);
                 gl.clearColor(0, 0, 0, 0);
                 gl.clear(gl.COLOR_BUFFER_BIT);
-                
+
                 gl.useProgram(planetProgram);
-                gl.uniform2f(planetUniforms.resolution, canvas.width, canvas.height);
+                gl.uniform2f(
+                    planetUniforms.resolution,
+                    canvas.width,
+                    canvas.height
+                );
                 gl.uniform1f(planetUniforms.time, currentTime);
                 gl.uniform2f(planetUniforms.mouse, 0.0, 0.0);
-                
+
                 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
                 gl.enableVertexAttribArray(planetUniforms.position);
-                gl.vertexAttribPointer(planetUniforms.position, 2, gl.FLOAT, false, 0, 0);
+                gl.vertexAttribPointer(
+                    planetUniforms.position,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    0,
+                    0
+                );
                 gl.drawArrays(gl.TRIANGLES, 0, 6);
             }
 
@@ -893,7 +1057,7 @@ export function PostProcessingPlanetShader({
             if (animationRef.current) {
                 cancelAnimationFrame(animationRef.current);
             }
-            
+
             // Cleanup
             gl.deleteProgram(planetProgram);
             gl.deleteProgram(tensorProgram);
@@ -904,7 +1068,7 @@ export function PostProcessingPlanetShader({
             gl.deleteShader(tensorFragmentShader);
             gl.deleteShader(kuwaharaFragmentShader);
             gl.deleteShader(finalFragmentShader);
-            
+
             if (planetFB) {
                 gl.deleteFramebuffer(planetFB.fb);
                 gl.deleteTexture(planetFB.texture);
@@ -921,7 +1085,13 @@ export function PostProcessingPlanetShader({
                 gl.deleteTexture(paperTexture);
             }
         };
-    }, [enablePainterly, painterlyRadius, kuwaharaAlpha, kuwaharaSamples, clearStrength]);
+    }, [
+        enablePainterly,
+        painterlyRadius,
+        kuwaharaAlpha,
+        kuwaharaSamples,
+        clearStrength,
+    ]);
 
     return (
         <canvas

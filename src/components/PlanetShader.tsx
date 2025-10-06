@@ -64,7 +64,7 @@ export function PlanetShader({ className = "", style }: PlanetShaderProps) {
 
       const float SEED = 0.0;
       vec3 CAMERA = vec3(0, 0, -1);
-      const float PLANET_RADIUS = 0.7;
+      const float PLANET_RADIUS = 0.9;
       const vec3 ROTATION_AXIS = vec3(0.3, 1, 0);
       const float ROTATION_SPEED = 0.2;
       const float MOON1_RADIUS = 0.2;
@@ -80,7 +80,7 @@ export function PlanetShader({ className = "", style }: PlanetShaderProps) {
       const float OCEAN_SIZE = 0.57;
       const vec3 OCEAN_COLOR = vec3(0.1, 0.15, 0.35);
       const vec3 ATMOSPHERE_COLOR = vec3(0.4, 0.6, 1);
-      const float ATMOSPHERE_DENSITY = 0.7;
+      const float ATMOSPHERE_DENSITY = 0.6;
       const vec3 DAWN_COLOR = vec3(1, 0.7, 0.0);
       const vec3 SUNSET_COLOR = vec3(1, 0.1, 0.0);
       const vec3 CLOUD_COLOR = vec3(0.8);

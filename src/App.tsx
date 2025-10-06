@@ -183,26 +183,23 @@ export default function App() {
 
                 {/* Planet Shader */}
                 <div className="absolute inset-0">
-                    <PlanetShader
-                        className="w-full h-full drop-shadow-2xl"
-                        style={{
-                            transform: `scale(${planetScale})`,
-                        }}
-                    />
-                    {enablePainterly && (
+                    {enablePainterly ? (
                         <PostProcessingPlanetShader
-                            className="w-full h-full"
+                            className="w-full h-full drop-shadow-2xl"
                             style={{
                                 transform: `scale(${planetScale})`,
-                                position: "absolute",
-                                top: 0,
-                                left: 0,
-                                pointerEvents: "none"
                             }}
                             enablePainterly={enablePainterly}
                             painterlyRadius={painterlyRadius}
                             kuwaharaAlpha={kuwaharaAlpha}
                             kuwaharaSamples={kuwaharaSamples}
+                        />
+                    ) : (
+                        <PlanetShader
+                            className="w-full h-full drop-shadow-2xl"
+                            style={{
+                                transform: `scale(${planetScale})`,
+                            }}
                         />
                     )}
                 </div>
@@ -383,65 +380,6 @@ export default function App() {
                 buttonPosition={confettiPosition}
             />
 
-            {/* Debug Panel for Painterly Controls */}
-            <div className="fixed top-4 left-4 z-50 bg-black/80 text-white p-4 rounded-lg text-sm max-w-xs">
-                <h3 className="font-bold mb-2">🎨 Painterly Controls</h3>
-                
-                <div className="space-y-2">
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            checked={enablePainterly}
-                            onChange={(e) => setEnablePainterly(e.target.checked)}
-                            className="rounded"
-                        />
-                        Enable Painterly
-                    </label>
-                    
-                    {enablePainterly && (
-                        <>
-                            <div>
-                                <label className="block text-xs">Radius: {painterlyRadius}</label>
-                                <input
-                                    type="range"
-                                    min="1"
-                                    max="10"
-                                    step="1"
-                                    value={painterlyRadius}
-                                    onChange={(e) => setPainterlyRadius(Number(e.target.value))}
-                                    className="w-full"
-                                />
-                            </div>
-                            
-                            <div>
-                                <label className="block text-xs">Alpha: {kuwaharaAlpha}</label>
-                                <input
-                                    type="range"
-                                    min="1"
-                                    max="50"
-                                    step="1"
-                                    value={kuwaharaAlpha}
-                                    onChange={(e) => setKuwaharaAlpha(Number(e.target.value))}
-                                    className="w-full"
-                                />
-                            </div>
-                            
-                            <div>
-                                <label className="block text-xs">Samples: {kuwaharaSamples}</label>
-                                <input
-                                    type="range"
-                                    min="4"
-                                    max="16"
-                                    step="1"
-                                    value={kuwaharaSamples}
-                                    onChange={(e) => setKuwaharaSamples(Number(e.target.value))}
-                                    className="w-full"
-                                />
-                            </div>
-                        </>
-                    )}
-                </div>
-            </div>
         </div>
     );
 }
